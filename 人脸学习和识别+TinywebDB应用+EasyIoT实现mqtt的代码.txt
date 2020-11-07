@@ -1,0 +1,55 @@
+/*!
+ * MindPlus
+ * mpython
+ *
+ */
+#include <MPython.h>
+#include <DFRobot_Iot.h>
+#include <mPython_tinywebdb.h>
+#include <DFRobot_HuskyLens.h>
+// 静态常量
+const String topics[5] = {"c3PBcmFMR","","","",""};
+// 创建对象
+DFRobot_Iot       myIot;
+mPython_TinyWebDB mydb;
+DFRobot_HuskyLens huskylens;
+
+
+// 主程序开始
+void setup() {
+	mPython.begin();
+	myIot.wifiConnect("Miro", "1372051053");
+	while (!myIot.wifiStatus()) {yield();}
+	display.setCursorLine(1);
+	display.printLine(myIot.getWiFiLocalIP());
+	myIot.init("iot.dfrobot.com.cn","Z0h15mFMg","","WA2JcmKMgz",topics,1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	display.setCursorLine(2);
+	display.printLine("MQTT连接成功");
+	mydb.setServerParameter("http://tinywebdb.appinventor.space/api", "miro007","05104ad2");
+	huskylens.beginI2CUntilSuccess();
+	huskylens.writeAlgorithm(ALGORITHM_FACE_RECOGNITION);
+}
+void loop() {
+	huskylens.request();
+	if (huskylens.isAppear(1,HUSKYLENSResultBlock)) {
+		rgb.write(0, 0x00FF00);
+		display.setCursorLine(3);
+		display.printLine(mydb.getTag("1"));
+		myIot.publish(topic_0, mydb.getTag("1"));
+	}
+	else {
+		if (huskylens.isAppear(2,HUSKYLENSResultBlock)) {
+			display.setCursorLine(3);
+			display.printLine(mydb.getTag("2"));
+			rgb.write(0, 0xFF0000);
+			myIot.publish(topic_0, mydb.getTag("2"));
+		}
+		else {
+			display.setCursorLine(3);
+			display.printLine("此人脸尚未录入，请先录入人脸！");
+			rgb.write(0, 0x0000FF);
+		}
+	}
+}
