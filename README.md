@@ -1,0 +1,2 @@
+# FacingRecognition-TinywebDB-EasyIot
+基于二哈实现多人人脸学习和识别+TinywebDB实现云数据库应用+EasyIoT实现mqtt数据上传
